@@ -41,8 +41,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: hacs/action@main
-        env:
-          CATEGORY: integration
+        with:
+          category: integration
 
   hassfest:
     runs-on: ubuntu-latest
