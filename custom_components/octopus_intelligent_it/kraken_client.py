@@ -338,16 +338,21 @@ class KrakenClient:
                 raise KrakenAuthError(f"Invalid credentials: {errors}")
             raise KrakenAPIError(errors)
 
-        access_token: str = data["data"]["obtainKrakenToken"]["token"]
-        _LOGGER.debug("[login] Step 1 success, obtained short-lived access token")
-
-        # Step 2: obtain long-lived refresh token (requires Authorization header)
+        token_response = data["data"]["obtainKrakenToken"]
+        access_token: str = token_response["token"]
+        short_refresh_token: str = token_response["refreshToken"]
         _LOGGER.debug(
-            "[login] Step 2: exchanging access token for long-lived refresh token"
+            "[login] Step 1 success, obtained short-lived access + refresh tokens"
+        )
+
+        # Step 2: obtain long-lived refresh token
+        # Requires Authorization header (access token) + krakenToken body (refresh token)
+        _LOGGER.debug(
+            "[login] Step 2: exchanging refresh token for long-lived refresh token"
         )
         payload2 = {
             "query": OBTAIN_LONG_LIVED_REFRESH_TOKEN,
-            "variables": {"input": {"krakenToken": access_token}},
+            "variables": {"input": {"krakenToken": short_refresh_token}},
             "operationName": "generateLongLivedRefreshToken",
         }
         headers2 = {**headers, "Authorization": access_token}
