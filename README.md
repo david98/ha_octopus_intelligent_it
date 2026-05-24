@@ -5,6 +5,8 @@
 
 > **Note:** This project was developed with the assistance of [Claude Code](https://claude.ai/code) (Anthropic's AI coding assistant). All code has been reviewed and validated by a human developer.
 
+> **Disclaimer:** This project is an independent, community-developed integration and is **not affiliated with, endorsed by, or associated with Octopus Energy Ltd, Octopus Energy Italia S.r.l., or any of their subsidiaries**. "Octopus Energy" and related names and logos are trademarks of their respective owners. Use of these names is purely for descriptive identification purposes.
+
 A Home Assistant custom integration for **Octopus Energy Italia** (SmartFlex devices).
 It exposes your SmartFlex vehicle or charger as native HA entities — schedule times,
 charge targets, device status, and alerts — and lets you modify charging preferences
@@ -96,6 +98,16 @@ make check        # Full pre-push gate: lint + format check
 Pre-commit hooks auto-fix staged Python files via Ruff (format + lint with `--fix`) and re-stage the result.
 Pre-push runs the full `make lint` + `make format` gate.
 Commit messages must follow [Conventional Commits](https://www.conventionalcommits.org/) (enforced by `convco`).
+
+---
+
+## Disclaimer
+
+This is an **independent, community project** and is in no way affiliated with, endorsed by, or associated with **Octopus Energy Ltd**, **Octopus Energy Italia S.r.l.**, or any of their subsidiaries or affiliates.
+
+"Octopus Energy", "Kraken", "SmartFlex", and related names, logos, and trademarks are the property of their respective owners. Their use in this project is solely for descriptive and identification purposes, to indicate compatibility with the Octopus Energy Italia platform.
+
+This integration accesses the Octopus Energy Italia GraphQL API on the user's behalf, using only the credentials provided by the user. The project authors assume no responsibility for changes to the API, service interruptions, or any consequences arising from use of this software.
 
 ---
 
