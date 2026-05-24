@@ -341,7 +341,7 @@ class KrakenClient:
         access_token: str = data["data"]["obtainKrakenToken"]["token"]
         _LOGGER.debug("[login] Step 1 success, obtained short-lived access token")
 
-        # Step 2: obtain long-lived refresh token
+        # Step 2: obtain long-lived refresh token (requires Authorization header)
         _LOGGER.debug(
             "[login] Step 2: exchanging access token for long-lived refresh token"
         )
@@ -350,9 +350,10 @@ class KrakenClient:
             "variables": {"input": {"krakenToken": access_token}},
             "operationName": "generateLongLivedRefreshToken",
         }
+        headers2 = {**headers, "Authorization": access_token}
         try:
             async with session.post(
-                graphql_url, json=payload2, headers=headers
+                graphql_url, json=payload2, headers=headers2
             ) as resp2:
                 _LOGGER.debug("[login] Step 2 HTTP status=%s", resp2.status)
                 resp2.raise_for_status()
