@@ -24,8 +24,8 @@ custom_components/
     ├── sensor.py                # Read-only sensors (status, provider, alerts, …)
     ├── binary_sensor.py         # Boolean sensors (suspended, capped, has_alerts)
     ├── select.py                # Writable selects (mode, unit)
-    ├── time.py                  # Writable time entities (target time × 7 days)
-    ├── number.py                # Writable number entities (max/min charge × 7 days)
+    ├── time.py                  # Writable time entity (single target_time per device, broadcast to all 7 days)
+    ├── number.py                # Writable number entity (single max_charge per device, broadcast to all 7 days)
     ├── strings.json             # EN translation source of truth
     └── translations/
         ├── en.json
@@ -61,7 +61,7 @@ Wraps `aiohttp.ClientSession`. Key points:
 
 Merges results into `dict[device_id, DeviceData]`.
 
-`async_set_device_preferences()` builds the full 7-day schedule payload from current data + overrides, calls `SetSmartFlexDevicePreferences`, then triggers a refresh.
+`async_set_device_preferences()` accepts `time: str | None` and `max_charge: float | None` keyword args. It broadcasts the same value to all 7 days in the schedule payload, never includes a `min` field, and omits `mode`/`unit` from the mutation when they are `None`. Calls `SetSmartFlexDevicePreferences`, then triggers a refresh.
 
 ### Entity platforms
 
@@ -70,8 +70,8 @@ Merges results into `dict[device_id, DeviceData]`.
 | `sensor` | 7 (status, provider, gridExport, targetType, alertsCount, latestAlertMsg, latestAlertTime) |
 | `binary_sensor` | 3 (suspended, chargingDurationCapped, hasAlerts) |
 | `select` | 2 (mode, unit) |
-| `time` | 7 (one per day of week) |
-| `number` | 7–14 (max × 7; min × 7 only when minConstraint is present) |
+| `time` | 1 (`target_time` — value broadcast to all 7 schedule days) |
+| `number` | 1 (`max_charge` — value broadcast to all 7 schedule days) |
 
 ## Dev workflow
 

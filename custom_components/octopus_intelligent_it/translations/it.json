@@ -66,29 +66,10 @@
       "unit": { "name": "Unità di ricarica" }
     },
     "time": {
-      "monday_target_time": { "name": "Lunedì — orario target" },
-      "tuesday_target_time": { "name": "Martedì — orario target" },
-      "wednesday_target_time": { "name": "Mercoledì — orario target" },
-      "thursday_target_time": { "name": "Giovedì — orario target" },
-      "friday_target_time": { "name": "Venerdì — orario target" },
-      "saturday_target_time": { "name": "Sabato — orario target" },
-      "sunday_target_time": { "name": "Domenica — orario target" }
+      "target_time": { "name": "Orario target" }
     },
     "number": {
-      "monday_max": { "name": "Lunedì — ricarica massima" },
-      "tuesday_max": { "name": "Martedì — ricarica massima" },
-      "wednesday_max": { "name": "Mercoledì — ricarica massima" },
-      "thursday_max": { "name": "Giovedì — ricarica massima" },
-      "friday_max": { "name": "Venerdì — ricarica massima" },
-      "saturday_max": { "name": "Sabato — ricarica massima" },
-      "sunday_max": { "name": "Domenica — ricarica massima" },
-      "monday_min": { "name": "Lunedì — ricarica minima" },
-      "tuesday_min": { "name": "Martedì — ricarica minima" },
-      "wednesday_min": { "name": "Mercoledì — ricarica minima" },
-      "thursday_min": { "name": "Giovedì — ricarica minima" },
-      "friday_min": { "name": "Venerdì — ricarica minima" },
-      "saturday_min": { "name": "Sabato — ricarica minima" },
-      "sunday_min": { "name": "Domenica — ricarica minima" }
+      "max_charge": { "name": "Ricarica massima" }
     }
   }
 }

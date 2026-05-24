@@ -12,6 +12,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
+from .const import DAYS_OF_WEEK
 from .kraken_client import KrakenAuthError, KrakenClient, KrakenError
 from .queries import (
     GET_SMART_FLEX_DEVICE_ALERTS,
@@ -148,7 +149,8 @@ class OctopusDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceData]])
         *,
         mode: str | None = None,
         unit: str | None = None,
-        schedule_overrides: dict[str, dict[str, Any]] | None = None,
+        time: str | None = None,
+        max_charge: float | None = None,
     ) -> None:
         """Write updated preferences for a device, then request a data refresh.
 
@@ -156,8 +158,8 @@ class OctopusDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceData]])
             device_id: The SmartFlex device ID to update.
             mode: Optional new mode (e.g. ``"CHARGE"``).
             unit: Optional new unit (e.g. ``"PERCENTAGE"``).
-            schedule_overrides: Dict mapping day-of-week strings to partial
-                schedule updates ``{time?, min?, max?}``.
+            time: Optional new target time in ``HH:MM`` format, applied to all days.
+            max_charge: Optional new maximum charge value, applied to all days.
         """
         if self.data is None or device_id not in self.data:
             raise UpdateFailed(f"No data for device {device_id}")
@@ -168,37 +170,49 @@ class OctopusDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceData]])
         new_mode = mode if mode is not None else current_prefs.get("mode")
         new_unit = unit if unit is not None else current_prefs.get("unit")
 
-        # Build the full 7-day schedule from current data, applying overrides
+        # Determine canonical time and max from override or current first schedule entry
         current_schedules: list[dict[str, Any]] = current_prefs.get("schedules", [])
-        schedules_by_day: dict[str, dict[str, Any]] = {
-            s["dayOfWeek"]: s for s in current_schedules
-        }
+        first_entry: dict[str, Any] = current_schedules[0] if current_schedules else {}
 
-        if schedule_overrides:
-            for day, override in schedule_overrides.items():
-                existing = schedules_by_day.get(day, {"dayOfWeek": day})
-                schedules_by_day[day] = {**existing, **override}
+        canonical_time_raw: str | None = (
+            time if time is not None else first_entry.get("time")
+        )
+        if canonical_time_raw is not None:
+            # Normalise to HH:MM (strip seconds if present)
+            canonical_time: str | None = (
+                canonical_time_raw[:5]
+                if len(canonical_time_raw) >= 5
+                else canonical_time_raw
+            )
+        else:
+            canonical_time = None
 
-        # Build the mutation input — strip server-only fields
-        schedule_inputs = []
-        for day_sched in schedules_by_day.values():
-            entry: dict[str, Any] = {"dayOfWeek": day_sched["dayOfWeek"]}
-            if "time" in day_sched and day_sched["time"] is not None:
-                # Normalise to HH:MM (strip seconds if present)
-                raw_time: str = str(day_sched["time"])
-                entry["time"] = raw_time[:5] if len(raw_time) >= 5 else raw_time
-            if "max" in day_sched and day_sched["max"] is not None:
-                entry["max"] = float(day_sched["max"])
-            if "min" in day_sched and day_sched["min"] is not None:
-                entry["min"] = float(day_sched["min"])
+        canonical_max: float | None = max_charge
+        if canonical_max is None:
+            raw = first_entry.get("max")
+            try:
+                canonical_max = float(raw) if raw is not None else None
+            except (TypeError, ValueError):
+                canonical_max = None
+
+        # Build a uniform 7-entry schedule — every day gets identical {time, max}, no min
+        schedule_inputs: list[dict[str, Any]] = []
+        for day in DAYS_OF_WEEK:
+            entry: dict[str, Any] = {"dayOfWeek": day}
+            if canonical_time is not None:
+                entry["time"] = canonical_time
+            if canonical_max is not None:
+                entry["max"] = canonical_max
             schedule_inputs.append(entry)
 
         mutation_input: dict[str, Any] = {
             "deviceId": device_id,
-            "mode": new_mode,
-            "unit": new_unit,
             "schedules": schedule_inputs,
         }
+        if new_mode is not None:
+            mutation_input["mode"] = new_mode
+        if new_unit is not None:
+            mutation_input["unit"] = new_unit
 
         try:
             await self._client.graphql(

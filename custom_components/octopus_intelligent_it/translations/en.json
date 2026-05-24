@@ -66,29 +66,10 @@
       "unit": { "name": "Charge unit" }
     },
     "time": {
-      "monday_target_time": { "name": "Monday — target time" },
-      "tuesday_target_time": { "name": "Tuesday — target time" },
-      "wednesday_target_time": { "name": "Wednesday — target time" },
-      "thursday_target_time": { "name": "Thursday — target time" },
-      "friday_target_time": { "name": "Friday — target time" },
-      "saturday_target_time": { "name": "Saturday — target time" },
-      "sunday_target_time": { "name": "Sunday — target time" }
+      "target_time": { "name": "Target time" }
     },
     "number": {
-      "monday_max": { "name": "Monday — max charge" },
-      "tuesday_max": { "name": "Tuesday — max charge" },
-      "wednesday_max": { "name": "Wednesday — max charge" },
-      "thursday_max": { "name": "Thursday — max charge" },
-      "friday_max": { "name": "Friday — max charge" },
-      "saturday_max": { "name": "Saturday — max charge" },
-      "sunday_max": { "name": "Sunday — max charge" },
-      "monday_min": { "name": "Monday — min charge" },
-      "tuesday_min": { "name": "Tuesday — min charge" },
-      "wednesday_min": { "name": "Wednesday — min charge" },
-      "thursday_min": { "name": "Thursday — min charge" },
-      "friday_min": { "name": "Friday — min charge" },
-      "saturday_min": { "name": "Saturday — min charge" },
-      "sunday_min": { "name": "Sunday — min charge" }
+      "max_charge": { "name": "Max charge" }
     }
   }
 }

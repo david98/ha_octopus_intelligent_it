@@ -1,6 +1,6 @@
 ---
 name: project-ha-integration
-description: HA custom integration octopus_intelligent_it — architecture, recurring lint patterns, known issues found in first, second, and third review
+description: HA custom integration octopus_intelligent_it — architecture, recurring lint patterns, known issues found across six reviews (May 2026)
 metadata:
   type: project
 ---
@@ -55,5 +55,19 @@ The `obtainLongLivedRefreshToken` step was removed from the login flow. `login_w
 - `BinarySensorDeviceClass.PROBLEM` is appropriate for boolean problem/fault states.
 - mypy `call-arg` error on `ConfigFlow(domain=DOMAIN)` is a known false positive — ignore.
 - ARG rules (unused method arguments) are NOT in ruff's default ruleset.
+
+**Schedule collapse refactor (seventh review, May 2026 — collapse per-day to single entity)**:
+FIXED in eighth review (iteration 1 fix run, May 2026):
+- coordinator.py: `from .const import DAYS_OF_WEEK` moved to module-level import (was deferred inside method). RESOLVED.
+- coordinator.py: float conversion now wrapped in try/except (TypeError, ValueError). RESOLVED.
+- coordinator.py: `mode` and `unit` are now conditionally added to `mutation_input` only when non-None. RESOLVED.
+- time.py: `list[dict]` annotations replaced with `list[dict[str, Any]]`. RESOLVED.
+
+REMAINING after eighth review (iteration 1 fix run, May 2026):
+- coordinator.py L208: dict literal `{"deviceId": device_id, "schedules": schedule_inputs}` exceeds 88-char line length — ruff format would split it across 4 lines. MEDIUM (format violation).
+- time.py L54: `.get("schedules", [])` call line exceeds 88 chars — ruff format would wrap it. MEDIUM (format violation).
+- time.py L66: `.get("scheduleSettings", [])` call line exceeds 88 chars — ruff format would wrap it. MEDIUM (format violation).
+- time.py async_set_value: validation only emits warnings; writes always proceed to the API regardless of range/alignment violations (carry-over — not new). LOW.
+- time.py L82-83: `from_minutes` falls back to `0` when `time_from` is None, but `time_from` is derived from `_parse_time("00:00:00")` which cannot fail — inconsistency in None guard. LOW.
 
 **How to apply**: Check for these patterns on every review of this integration.
