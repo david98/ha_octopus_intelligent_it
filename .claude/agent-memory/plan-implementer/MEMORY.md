@@ -1,0 +1,1 @@
+- [Project: Octopus Intelligent IT Integration](project_octopus_integration.md) — HA custom integration for Octopus Energy Italia; GraphQL client with long-lived refresh token auth; Proxyman captures in requests/ are zip archives with base64-encoded JSON bodies

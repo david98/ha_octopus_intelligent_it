@@ -1,0 +1,94 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Octopus Intelligent (Italia) — Login",
+        "description": "Enter your Octopus Energy Italia credentials. Your password will not be stored — only a long-lived refresh token is kept.",
+        "data": {
+          "email": "Email address",
+          "password": "Password",
+          "graphql_url": "API URL (advanced)"
+        }
+      },
+      "account": {
+        "title": "Select account",
+        "description": "Multiple accounts were found. Select the account to configure.",
+        "data": {
+          "account_number": "Account number"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate",
+        "description": "Your session has expired. Please re-enter your Octopus Energy Italia credentials.",
+        "data": {
+          "email": "Email address",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid email or password.",
+      "cannot_connect": "Could not connect to the Octopus API. Check your internet connection.",
+      "unknown": "An unexpected error occurred.",
+      "no_accounts": "No accounts found for these credentials."
+    },
+    "abort": {
+      "already_configured": "This account is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Octopus Intelligent (Italia) — Options",
+        "data": {
+          "scan_interval": "Polling interval (seconds)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": { "name": "Status" },
+      "provider": { "name": "Provider" },
+      "grid_export": { "name": "Grid export" },
+      "target_type": { "name": "Target type" },
+      "alerts_count": { "name": "Alert count" },
+      "latest_alert_message": { "name": "Latest alert message" },
+      "latest_alert_published_at": { "name": "Latest alert time" }
+    },
+    "binary_sensor": {
+      "suspended": { "name": "Suspended" },
+      "charging_duration_capped": { "name": "Charging duration capped" },
+      "has_alerts": { "name": "Has alerts" }
+    },
+    "select": {
+      "mode": { "name": "Mode" },
+      "unit": { "name": "Charge unit" }
+    },
+    "time": {
+      "monday_target_time": { "name": "Monday — target time" },
+      "tuesday_target_time": { "name": "Tuesday — target time" },
+      "wednesday_target_time": { "name": "Wednesday — target time" },
+      "thursday_target_time": { "name": "Thursday — target time" },
+      "friday_target_time": { "name": "Friday — target time" },
+      "saturday_target_time": { "name": "Saturday — target time" },
+      "sunday_target_time": { "name": "Sunday — target time" }
+    },
+    "number": {
+      "monday_max": { "name": "Monday — max charge" },
+      "tuesday_max": { "name": "Tuesday — max charge" },
+      "wednesday_max": { "name": "Wednesday — max charge" },
+      "thursday_max": { "name": "Thursday — max charge" },
+      "friday_max": { "name": "Friday — max charge" },
+      "saturday_max": { "name": "Saturday — max charge" },
+      "sunday_max": { "name": "Sunday — max charge" },
+      "monday_min": { "name": "Monday — min charge" },
+      "tuesday_min": { "name": "Tuesday — min charge" },
+      "wednesday_min": { "name": "Wednesday — min charge" },
+      "thursday_min": { "name": "Thursday — min charge" },
+      "friday_min": { "name": "Friday — min charge" },
+      "saturday_min": { "name": "Saturday — min charge" },
+      "sunday_min": { "name": "Sunday — min charge" }
+    }
+  }
+}

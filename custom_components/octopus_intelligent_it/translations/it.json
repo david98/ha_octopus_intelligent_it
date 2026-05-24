@@ -1,0 +1,94 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Octopus Intelligent (Italia) — Accesso",
+        "description": "Inserisci le credenziali del tuo account Octopus Energy Italia. La password non verrà memorizzata — verrà conservato solo un token di aggiornamento a lunga durata.",
+        "data": {
+          "email": "Indirizzo email",
+          "password": "Password",
+          "graphql_url": "URL API (avanzato)"
+        }
+      },
+      "account": {
+        "title": "Seleziona account",
+        "description": "Sono stati trovati più account. Seleziona l'account da configurare.",
+        "data": {
+          "account_number": "Numero account"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Riautenticazione",
+        "description": "La sessione è scaduta. Reinserisci le credenziali di Octopus Energy Italia.",
+        "data": {
+          "email": "Indirizzo email",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Email o password non validi.",
+      "cannot_connect": "Impossibile connettersi all'API Octopus. Controlla la connessione a Internet.",
+      "unknown": "Si è verificato un errore imprevisto.",
+      "no_accounts": "Nessun account trovato per queste credenziali."
+    },
+    "abort": {
+      "already_configured": "Questo account è già configurato."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Octopus Intelligent (Italia) — Opzioni",
+        "data": {
+          "scan_interval": "Intervallo di aggiornamento (secondi)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "status": { "name": "Stato" },
+      "provider": { "name": "Provider" },
+      "grid_export": { "name": "Esportazione rete" },
+      "target_type": { "name": "Tipo di obiettivo" },
+      "alerts_count": { "name": "Numero di avvisi" },
+      "latest_alert_message": { "name": "Ultimo messaggio di avviso" },
+      "latest_alert_published_at": { "name": "Orario ultimo avviso" }
+    },
+    "binary_sensor": {
+      "suspended": { "name": "Sospeso" },
+      "charging_duration_capped": { "name": "Durata ricarica limitata" },
+      "has_alerts": { "name": "Ha avvisi" }
+    },
+    "select": {
+      "mode": { "name": "Modalità" },
+      "unit": { "name": "Unità di ricarica" }
+    },
+    "time": {
+      "monday_target_time": { "name": "Lunedì — orario target" },
+      "tuesday_target_time": { "name": "Martedì — orario target" },
+      "wednesday_target_time": { "name": "Mercoledì — orario target" },
+      "thursday_target_time": { "name": "Giovedì — orario target" },
+      "friday_target_time": { "name": "Venerdì — orario target" },
+      "saturday_target_time": { "name": "Sabato — orario target" },
+      "sunday_target_time": { "name": "Domenica — orario target" }
+    },
+    "number": {
+      "monday_max": { "name": "Lunedì — ricarica massima" },
+      "tuesday_max": { "name": "Martedì — ricarica massima" },
+      "wednesday_max": { "name": "Mercoledì — ricarica massima" },
+      "thursday_max": { "name": "Giovedì — ricarica massima" },
+      "friday_max": { "name": "Venerdì — ricarica massima" },
+      "saturday_max": { "name": "Sabato — ricarica massima" },
+      "sunday_max": { "name": "Domenica — ricarica massima" },
+      "monday_min": { "name": "Lunedì — ricarica minima" },
+      "tuesday_min": { "name": "Martedì — ricarica minima" },
+      "wednesday_min": { "name": "Mercoledì — ricarica minima" },
+      "thursday_min": { "name": "Giovedì — ricarica minima" },
+      "friday_min": { "name": "Venerdì — ricarica minima" },
+      "saturday_min": { "name": "Sabato — ricarica minima" },
+      "sunday_min": { "name": "Domenica — ricarica minima" }
+    }
+  }
+}

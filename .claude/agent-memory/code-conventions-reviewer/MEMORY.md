@@ -1,0 +1,1 @@
+- [HA Octopus Integration Project](project_ha_integration.md) — architecture, recurring lint patterns, and issues found in first May 2026 review
