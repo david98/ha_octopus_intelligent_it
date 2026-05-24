@@ -1,6 +1,9 @@
 # Octopus Intelligent (Italia) — Home Assistant Integration
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
+[![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-blueviolet?logo=anthropic)](https://claude.ai/code)
+
+> **Note:** This project was developed with the assistance of [Claude Code](https://claude.ai/code) (Anthropic's AI coding assistant). All code has been reviewed and validated by a human developer.
 
 A Home Assistant custom integration for **Octopus Energy Italia** (SmartFlex devices).
 It exposes your SmartFlex vehicle or charger as native HA entities — schedule times,
