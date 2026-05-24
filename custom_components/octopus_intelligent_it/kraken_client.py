@@ -94,15 +94,49 @@ class KrakenClient:
         if operation_name is not None:
             payload["operationName"] = operation_name
 
-        async with self._session.post(
+        _LOGGER.debug(
+            "[graphql_raw] op=%s url=%s auth=%s",
+            operation_name,
             self._graphql_url,
-            json=payload,
-            headers=headers,
-        ) as resp:
-            if resp.status == 401:
-                raise KrakenAuthError("HTTP 401 Unauthorized")
-            resp.raise_for_status()
-            return await resp.json()
+            auth,
+        )
+
+        try:
+            async with self._session.post(
+                self._graphql_url,
+                json=payload,
+                headers=headers,
+            ) as resp:
+                _LOGGER.debug(
+                    "[graphql_raw] op=%s HTTP status=%s", operation_name, resp.status
+                )
+                if resp.status == 401:
+                    raise KrakenAuthError("HTTP 401 Unauthorized")
+                resp.raise_for_status()
+                body = await resp.json()
+        except (KrakenAuthError, KrakenAPIError):
+            raise
+        except Exception as exc:
+            _LOGGER.debug(
+                "[graphql_raw] op=%s exception: %s: %s",
+                operation_name,
+                type(exc).__name__,
+                exc,
+            )
+            raise
+
+        if body.get("errors"):
+            _LOGGER.debug(
+                "[graphql_raw] op=%s GraphQL errors: %s", operation_name, body["errors"]
+            )
+        else:
+            _LOGGER.debug(
+                "[graphql_raw] op=%s success, data keys: %s",
+                operation_name,
+                list((body.get("data") or {}).keys()),
+            )
+
+        return body
 
     async def _refresh(self) -> None:
         """Obtain a new short-lived access token using the refresh token.
@@ -110,6 +144,7 @@ class KrakenClient:
         If the API returns a rotated refresh token, the stored value is
         updated and the on_refresh_token_change callback is invoked.
         """
+        _LOGGER.debug("[refresh] Refreshing access token using refresh token")
         try:
             response = await self._graphql_raw(
                 LOGIN,
@@ -120,6 +155,7 @@ class KrakenClient:
         except KrakenAuthError:
             raise
         except Exception as exc:
+            _LOGGER.debug("[refresh] Network error: %s: %s", type(exc).__name__, exc)
             raise KrakenError(f"Network error during token refresh: {exc}") from exc
 
         errors = response.get("errors", [])
@@ -142,14 +178,17 @@ class KrakenClient:
                 algorithms=["RS256"],
             )
             self._access_exp = int(claims.get("exp", 0))
+            _LOGGER.debug("[refresh] Access token decoded, exp=%s", self._access_exp)
         except Exception as exc:
             _LOGGER.debug("Could not decode JWT expiry, using 1-hour fallback: %s", exc)
             self._access_exp = int(time.time()) + 3600
 
         self._access_token = new_access_token
+        _LOGGER.debug("[refresh] Access token obtained successfully")
 
         # Persist rotated refresh token
         if new_refresh_token and new_refresh_token != self._refresh_token:
+            _LOGGER.debug("[refresh] Refresh token rotated, persisting new value")
             self._refresh_token = new_refresh_token
             if new_refresh_exp is not None:
                 self._refresh_exp = new_refresh_exp
@@ -160,12 +199,16 @@ class KrakenClient:
         """Ensure a valid access token is available, refreshing if needed."""
         now = int(time.time())
         if self._access_token is not None and self._access_exp - now >= 60:
+            _LOGGER.debug(
+                "[ensure_token] Token still valid for %ss", self._access_exp - now
+            )
             return
         async with self._lock:
             # Re-check inside the lock (another coroutine may have refreshed)
             now = int(time.time())
             if self._access_token is not None and self._access_exp - now >= 60:
                 return
+            _LOGGER.debug("[ensure_token] Token missing or expiring, refreshing...")
             await self._refresh()
 
     # ------------------------------------------------------------------
@@ -191,6 +234,7 @@ class KrakenClient:
             KrakenAPIError: When the API returns application errors.
             KrakenError: On network or unexpected failures.
         """
+        _LOGGER.debug("[graphql] op=%s starting", operation_name)
         await self._ensure_token()
 
         for attempt in range(2):
@@ -203,6 +247,10 @@ class KrakenClient:
                 )
             except KrakenAuthError:
                 if attempt == 0:
+                    _LOGGER.debug(
+                        "[graphql] op=%s auth error on attempt 0, refreshing token",
+                        operation_name,
+                    )
                     self._access_token = None
                     await self._ensure_token()
                     continue
@@ -212,6 +260,10 @@ class KrakenClient:
             if errors:
                 codes = {e.get("extensions", {}).get("errorCode", "") for e in errors}
                 if _TOKEN_EXPIRED_CODE in codes and attempt == 0:
+                    _LOGGER.debug(
+                        "[graphql] op=%s token expired (KT-CT-1124), refreshing",
+                        operation_name,
+                    )
                     self._access_token = None
                     await self._ensure_token()
                     continue
@@ -219,6 +271,7 @@ class KrakenClient:
                     raise KrakenAuthError(f"Auth error: {errors}")
                 raise KrakenAPIError(errors)
 
+            _LOGGER.debug("[graphql] op=%s completed successfully", operation_name)
             return response.get("data", {})
 
         raise KrakenError("Failed after retry")  # should not reach here
@@ -249,6 +302,10 @@ class KrakenClient:
             KrakenAPIError: On API errors.
             KrakenError: On network errors.
         """
+        _LOGGER.debug(
+            "[login] Step 1: email/password login → url=%s email=%s", graphql_url, email
+        )
+
         # Step 1: email/password login → short-lived access token
         headers = {
             "Content-Type": "application/json",
@@ -262,23 +319,32 @@ class KrakenClient:
         }
         try:
             async with session.post(graphql_url, json=payload, headers=headers) as resp:
+                _LOGGER.debug("[login] Step 1 HTTP status=%s", resp.status)
                 resp.raise_for_status()
                 data = await resp.json()
         except (KrakenAuthError, KrakenAPIError):
             raise
         except Exception as exc:
+            _LOGGER.debug(
+                "[login] Step 1 network error: %s: %s", type(exc).__name__, exc
+            )
             raise KrakenError(f"Network error during login: {exc}") from exc
 
         errors = data.get("errors", [])
         if errors:
+            _LOGGER.debug("[login] Step 1 GraphQL errors: %s", errors)
             codes = {e.get("extensions", {}).get("errorCode", "") for e in errors}
             if codes & _AUTH_ERROR_CODES:
                 raise KrakenAuthError(f"Invalid credentials: {errors}")
             raise KrakenAPIError(errors)
 
         access_token: str = data["data"]["obtainKrakenToken"]["token"]
+        _LOGGER.debug("[login] Step 1 success, obtained short-lived access token")
 
         # Step 2: obtain long-lived refresh token
+        _LOGGER.debug(
+            "[login] Step 2: exchanging access token for long-lived refresh token"
+        )
         payload2 = {
             "query": OBTAIN_LONG_LIVED_REFRESH_TOKEN,
             "variables": {"input": {"krakenToken": access_token}},
@@ -288,21 +354,30 @@ class KrakenClient:
             async with session.post(
                 graphql_url, json=payload2, headers=headers
             ) as resp2:
+                _LOGGER.debug("[login] Step 2 HTTP status=%s", resp2.status)
                 resp2.raise_for_status()
                 data2 = await resp2.json()
         except (KrakenAuthError, KrakenAPIError):
             raise
         except Exception as exc:
+            _LOGGER.debug(
+                "[login] Step 2 network error: %s: %s", type(exc).__name__, exc
+            )
             raise KrakenError(
                 f"Network error obtaining long-lived token: {exc}"
             ) from exc
 
         errors2 = data2.get("errors", [])
         if errors2:
+            _LOGGER.debug("[login] Step 2 GraphQL errors: %s", errors2)
             raise KrakenAPIError(errors2)
 
         token_data = data2["data"]["obtainLongLivedRefreshToken"]
         long_lived_token: str = token_data["refreshToken"]
         expires_at: int = int(token_data["refreshExpiresIn"])
 
+        _LOGGER.debug(
+            "[login] Step 2 success, long-lived token obtained (expires_at=%s)",
+            expires_at,
+        )
         return long_lived_token, expires_at
