@@ -260,9 +260,14 @@ class KrakenClient:
             "variables": {"input": {"email": email, "password": password}},
             "operationName": "Login",
         }
-        async with session.post(graphql_url, json=payload, headers=headers) as resp:
-            resp.raise_for_status()
-            data = await resp.json()
+        try:
+            async with session.post(graphql_url, json=payload, headers=headers) as resp:
+                resp.raise_for_status()
+                data = await resp.json()
+        except (KrakenAuthError, KrakenAPIError):
+            raise
+        except Exception as exc:
+            raise KrakenError(f"Network error during login: {exc}") from exc
 
         errors = data.get("errors", [])
         if errors:
@@ -279,9 +284,18 @@ class KrakenClient:
             "variables": {"input": {"krakenToken": access_token}},
             "operationName": "generateLongLivedRefreshToken",
         }
-        async with session.post(graphql_url, json=payload2, headers=headers) as resp2:
-            resp2.raise_for_status()
-            data2 = await resp2.json()
+        try:
+            async with session.post(
+                graphql_url, json=payload2, headers=headers
+            ) as resp2:
+                resp2.raise_for_status()
+                data2 = await resp2.json()
+        except (KrakenAuthError, KrakenAPIError):
+            raise
+        except Exception as exc:
+            raise KrakenError(
+                f"Network error obtaining long-lived token: {exc}"
+            ) from exc
 
         errors2 = data2.get("errors", [])
         if errors2:
