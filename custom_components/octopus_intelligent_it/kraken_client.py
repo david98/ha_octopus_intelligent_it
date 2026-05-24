@@ -10,10 +10,7 @@ from typing import Any
 
 import jwt
 
-from .queries import (
-    LOGIN,
-    OBTAIN_LONG_LIVED_REFRESH_TOKEN,
-)
+from .queries import LOGIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -306,19 +303,30 @@ class KrakenClient:
             "[login] Step 1: email/password login → url=%s email=%s", graphql_url, email
         )
 
-        # Step 1: email/password login → short-lived access token
-        headers = {
+        _apollo_extensions = {
+            "clientLibrary": {"name": "apollo-kotlin", "version": "4.4.3"}
+        }
+        _base_headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "User-Agent": "ha-octopus-intelligent-it/0.1.0",
+            "User-Agent": "OctoAppClient/4.127.1 (IOS 26.4.2; iPhone)",
+            "X-Kraken-Flapjack": "d87595aac6aff50a6012190b5a90161f4bd7afde5c0a0051b471054b39296d0e",
         }
+
+        # Step 1: email/password login → short-lived access token
         payload = {
             "query": LOGIN,
             "variables": {"input": {"email": email, "password": password}},
             "operationName": "Login",
+            "extensions": _apollo_extensions,
         }
+        headers = {**_base_headers, "X-APOLLO-OPERATION-NAME": "Login"}
         try:
-            async with session.post(graphql_url, json=payload, headers=headers) as resp:
+            async with session.post(
+                f"{graphql_url}?debug_op_name=Login",
+                json=payload,
+                headers=headers,
+            ) as resp:
                 _LOGGER.debug("[login] Step 1 HTTP status=%s", resp.status)
                 resp.raise_for_status()
                 data = await resp.json()
@@ -339,51 +347,10 @@ class KrakenClient:
             raise KrakenAPIError(errors)
 
         token_response = data["data"]["obtainKrakenToken"]
-        access_token: str = token_response["token"]
-        short_refresh_token: str = token_response["refreshToken"]
-        _LOGGER.debug(
-            "[login] Step 1 success, obtained short-lived access + refresh tokens"
-        )
-
-        # Step 2: obtain long-lived refresh token
-        # Requires Authorization header (access token) + krakenToken body (refresh token)
-        _LOGGER.debug(
-            "[login] Step 2: exchanging refresh token for long-lived refresh token"
-        )
-        payload2 = {
-            "query": OBTAIN_LONG_LIVED_REFRESH_TOKEN,
-            "variables": {"input": {"krakenToken": short_refresh_token}},
-            "operationName": "generateLongLivedRefreshToken",
-        }
-        headers2 = {**headers, "Authorization": access_token}
-        try:
-            async with session.post(
-                graphql_url, json=payload2, headers=headers2
-            ) as resp2:
-                _LOGGER.debug("[login] Step 2 HTTP status=%s", resp2.status)
-                resp2.raise_for_status()
-                data2 = await resp2.json()
-        except (KrakenAuthError, KrakenAPIError):
-            raise
-        except Exception as exc:
-            _LOGGER.debug(
-                "[login] Step 2 network error: %s: %s", type(exc).__name__, exc
-            )
-            raise KrakenError(
-                f"Network error obtaining long-lived token: {exc}"
-            ) from exc
-
-        errors2 = data2.get("errors", [])
-        if errors2:
-            _LOGGER.debug("[login] Step 2 GraphQL errors: %s", errors2)
-            raise KrakenAPIError(errors2)
-
-        token_data = data2["data"]["obtainLongLivedRefreshToken"]
-        long_lived_token: str = token_data["refreshToken"]
-        expires_at: int = int(token_data["refreshExpiresIn"])
+        refresh_token: str = token_response["refreshToken"]
+        expires_at: int = int(token_response["refreshExpiresIn"])
 
         _LOGGER.debug(
-            "[login] Step 2 success, long-lived token obtained (expires_at=%s)",
-            expires_at,
+            "[login] Login success, refresh token obtained (expires_at=%s)", expires_at
         )
-        return long_lived_token, expires_at
+        return refresh_token, expires_at
