@@ -39,6 +39,9 @@ Located at custom_components/octopus_intelligent_it/.
 - time.py async_set_value: validation only logs warnings on out-of-range/misaligned times, write always proceeds to API.
 - .venv uses Python 3.14.5, pyproject.toml requires-python>=3.12, HA runs 3.12.x — mismatch noted.
 
+**Auth flow change (May 2026 — fifth review)**:
+The `obtainLongLivedRefreshToken` step was removed from the login flow. `login_with_credentials` now returns the standard refresh token directly from the Login mutation (`refreshToken` + `refreshExpiresIn`). The variable `OBTAIN_LONG_LIVED_REFRESH_TOKEN` in queries.py is now dead code. Stale "long-lived" language remains in: `KrakenClient` class docstring (L41-46), `login_with_credentials` docstring (L288-295), `strings.json`/`en.json`/`it.json` user step description, and `CLAUDE.md` architecture section.
+
 **HA-specific patterns confirmed valid**:
 - `_attr_native_unit_of_measurement = None` + `SensorStateClass.MEASUREMENT` is valid HA pattern for dimensionless integer counters.
 - `BinarySensorDeviceClass.PROBLEM` is appropriate for boolean problem/fault states.

@@ -47,7 +47,7 @@ class OctopusIntelligentItConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     def __init__(self) -> None:
-        self._long_lived_token: str = ""
+        self._refresh_token: str = ""
         self._refresh_expires_at: int = 0
         self._graphql_url: str = DEFAULT_GRAPHQL_URL
         self._accounts: list[dict[str, str]] = []
@@ -65,7 +65,7 @@ class OctopusIntelligentItConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             session = aiohttp_client.async_get_clientsession(self.hass)
             try:
-                long_lived, expires_at = await KrakenClient.login_with_credentials(
+                refresh_token, expires_at = await KrakenClient.login_with_credentials(
                     session, self._graphql_url, email, password
                 )
             except KrakenAuthError:
@@ -76,13 +76,13 @@ class OctopusIntelligentItConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 _LOGGER.exception("Unexpected error during Octopus IT login")
                 errors["base"] = "unknown"
             else:
-                self._long_lived_token = long_lived
+                self._refresh_token = refresh_token
                 self._refresh_expires_at = expires_at
 
                 # Fetch account list
                 try:
                     client = KrakenClient(
-                        session, self._graphql_url, long_lived, expires_at
+                        session, self._graphql_url, refresh_token, expires_at
                     )
                     data = await client.graphql(
                         GET_ACCOUNT_LIST, operation_name="GetAccountList"
@@ -105,7 +105,7 @@ class OctopusIntelligentItConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         return self.async_create_entry(
                             title=f"Octopus {account_number}",
                             data={
-                                CONF_REFRESH_TOKEN: self._long_lived_token,
+                                CONF_REFRESH_TOKEN: self._refresh_token,
                                 CONF_REFRESH_EXPIRES_AT: self._refresh_expires_at,
                                 CONF_ACCOUNT_NUMBER: account_number,
                                 CONF_GRAPHQL_URL: self._graphql_url,
@@ -134,7 +134,7 @@ class OctopusIntelligentItConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_create_entry(
                 title=f"Octopus {account_number}",
                 data={
-                    CONF_REFRESH_TOKEN: self._long_lived_token,
+                    CONF_REFRESH_TOKEN: self._refresh_token,
                     CONF_REFRESH_EXPIRES_AT: self._refresh_expires_at,
                     CONF_ACCOUNT_NUMBER: account_number,
                     CONF_GRAPHQL_URL: self._graphql_url,

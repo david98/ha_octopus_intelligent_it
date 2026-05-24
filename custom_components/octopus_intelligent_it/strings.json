@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Octopus Intelligent (Italia) — Login",
-        "description": "Enter your Octopus Energy Italia credentials. Your password will not be stored — only a long-lived refresh token is kept.",
+        "description": "Enter your Octopus Energy Italia credentials. Your password will not be stored — only an authentication refresh token is kept.",
         "data": {
           "email": "Email address",
           "password": "Password",

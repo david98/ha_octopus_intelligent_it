@@ -40,8 +40,8 @@ class KrakenClient:
     """Async GraphQL client for the Octopus Kraken Italia API.
 
     Manages short-lived access tokens transparently, refreshing them
-    automatically using a long-lived refresh token (~6 months). Notifies
-    the caller when the refresh token itself rotates so the new value can
+    automatically using the stored refresh token (~12 months TTL). Notifies
+    the caller when the refresh token rotates so the new value can
     be persisted.
     """
 
@@ -285,14 +285,14 @@ class KrakenClient:
         email: str,
         password: str,
     ) -> tuple[str, int]:
-        """Authenticate with email/password and return a long-lived refresh token.
+        """Authenticate with email/password and return the refresh token and expiry.
 
-        This method is intended for use in the config flow only. It:
-        1. Obtains a short-lived access token via email/password login.
-        2. Exchanges it for a long-lived refresh token (~6 months).
+        This method is intended for use in the config flow only. It
+        authenticates with email/password and returns the refresh token and
+        expiry directly from the Login mutation response.
 
         Returns:
-            A tuple of (long_lived_refresh_token, refresh_expires_at_unix_ts).
+            A tuple of (refresh_token, refresh_expires_at_unix_ts).
 
         Raises:
             KrakenAuthError: On invalid credentials.
@@ -300,7 +300,7 @@ class KrakenClient:
             KrakenError: On network errors.
         """
         _LOGGER.debug(
-            "[login] Step 1: email/password login → url=%s email=%s", graphql_url, email
+            "[login] email/password login → url=%s email=%s", graphql_url, email
         )
 
         _apollo_extensions = {
@@ -313,7 +313,6 @@ class KrakenClient:
             "X-Kraken-Flapjack": "d87595aac6aff50a6012190b5a90161f4bd7afde5c0a0051b471054b39296d0e",
         }
 
-        # Step 1: email/password login → short-lived access token
         payload = {
             "query": LOGIN,
             "variables": {"input": {"email": email, "password": password}},
@@ -327,20 +326,18 @@ class KrakenClient:
                 json=payload,
                 headers=headers,
             ) as resp:
-                _LOGGER.debug("[login] Step 1 HTTP status=%s", resp.status)
+                _LOGGER.debug("[login] HTTP status=%s", resp.status)
                 resp.raise_for_status()
                 data = await resp.json()
         except (KrakenAuthError, KrakenAPIError):
             raise
         except Exception as exc:
-            _LOGGER.debug(
-                "[login] Step 1 network error: %s: %s", type(exc).__name__, exc
-            )
+            _LOGGER.debug("[login] network error: %s: %s", type(exc).__name__, exc)
             raise KrakenError(f"Network error during login: {exc}") from exc
 
         errors = data.get("errors", [])
         if errors:
-            _LOGGER.debug("[login] Step 1 GraphQL errors: %s", errors)
+            _LOGGER.debug("[login] GraphQL errors: %s", errors)
             codes = {e.get("extensions", {}).get("errorCode", "") for e in errors}
             if codes & _AUTH_ERROR_CODES:
                 raise KrakenAuthError(f"Invalid credentials: {errors}")

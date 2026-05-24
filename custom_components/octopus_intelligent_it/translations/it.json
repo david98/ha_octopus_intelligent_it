@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Octopus Intelligent (Italia) — Accesso",
-        "description": "Inserisci le credenziali del tuo account Octopus Energy Italia. La password non verrà memorizzata — verrà conservato solo un token di aggiornamento a lunga durata.",
+        "description": "Inserisci le credenziali del tuo account Octopus Energy Italia. La password non verrà memorizzata — verrà conservato solo il token di aggiornamento dell'autenticazione.",
         "data": {
           "email": "Indirizzo email",
           "password": "Password",

@@ -19,16 +19,6 @@ mutation Login($input: ObtainJSONWebTokenInput!) {
 }
 """
 
-OBTAIN_LONG_LIVED_REFRESH_TOKEN = """
-mutation generateLongLivedRefreshToken($input: ObtainLongLivedRefreshTokenInput!) {
-  obtainLongLivedRefreshToken(input: $input) {
-    __typename
-    refreshToken
-    refreshExpiresIn
-  }
-}
-"""
-
 # --- Account ---
 
 GET_ACCOUNT_LIST = """

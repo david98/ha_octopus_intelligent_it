@@ -36,6 +36,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     session = aiohttp_client.async_get_clientsession(hass)
 
+    # The standard Kraken Login mutation does not rotate the refresh token, so
+    # this callback is wired defensively in case the API behaviour changes.
     def _on_refresh_change(new_token: str, new_exp: int) -> None:
         """Persist a rotated refresh token back to the config entry."""
         _LOGGER.debug("Octopus IT refresh token rotated; persisting new token")

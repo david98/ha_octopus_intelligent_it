@@ -18,7 +18,7 @@ custom_components/
     ├── const.py                 # Domain, config keys, defaults, platform list
     ├── queries.py               # GraphQL query/mutation strings (verbatim from API captures)
     ├── kraken_client.py         # Async GraphQL client with token refresh logic
-    ├── config_flow.py           # Config flow (email/pwd → long-lived token) + options flow
+    ├── config_flow.py           # Config flow (email/pwd → refresh token) + options flow
     ├── coordinator.py           # DataUpdateCoordinator: polls all device data
     ├── entity.py                # Base entity class (DeviceInfo, availability, helpers)
     ├── sensor.py                # Read-only sensors (status, provider, alerts, …)
@@ -39,11 +39,10 @@ README.md
 
 ### Auth flow
 
-1. Config flow: email + password → `Login` mutation → short-lived access token.
-2. Exchange for a long-lived refresh token (~6 months) via `obtainLongLivedRefreshToken`.
-3. Only the refresh token is stored in the config entry; credentials are discarded.
-4. `KrakenClient._ensure_token()` silently refreshes the access token (1-hour TTL) before each GraphQL call.
-5. If the API rotates the refresh token, `on_refresh_token_change` callback persists the new value to the config entry immediately.
+1. Config flow: email + password → `Login` mutation → refresh token (~12 months TTL) returned directly.
+2. Only the refresh token is stored in the config entry; credentials are discarded.
+3. `KrakenClient._ensure_token()` silently refreshes the access token (1-hour TTL) before each GraphQL call.
+4. If the API rotates the refresh token, `on_refresh_token_change` callback persists the new value to the config entry immediately.
 
 ### KrakenClient
 
