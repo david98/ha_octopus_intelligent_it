@@ -58,7 +58,9 @@ class OctopusSuspendedBinarySensor(OctopusDeviceEntity, BinarySensorEntity):
 _CAPPED_TRUE_VALUES: frozenset[object] = frozenset({"TRUE", "CAPPED", True})
 
 
-class OctopusChargingDurationCappedBinarySensor(OctopusDeviceEntity, BinarySensorEntity):
+class OctopusChargingDurationCappedBinarySensor(
+    OctopusDeviceEntity, BinarySensorEntity
+):
     """Binary sensor indicating whether the charging duration is capped."""
 
     _attr_translation_key = "charging_duration_capped"

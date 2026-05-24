@@ -142,7 +142,7 @@ class KrakenClient:
                 algorithms=["RS256"],
             )
             self._access_exp = int(claims.get("exp", 0))
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             _LOGGER.debug("Could not decode JWT expiry, using 1-hour fallback: %s", exc)
             self._access_exp = int(time.time()) + 3600
 

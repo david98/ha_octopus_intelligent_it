@@ -208,6 +208,9 @@ tempCodeRunnerFile.py
 # Ruff stuff:
 .ruff_cache/
 
+# Lefthook local overrides
+.lefthook-local.yml
+
 # PyPI configuration file
 .pypirc
 

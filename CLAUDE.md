@@ -121,6 +121,24 @@ print(json.dumps(resp, indent=2))
 "
 ```
 
+### Dev tooling
+
+The project uses **Ruff** (lint + format) gated by **lefthook** and **convco** for commit message validation.
+
+```bash
+make setup        # Create .venv, install ruff, run lefthook install
+make check        # Full pre-push gate: ruff check + ruff format --check
+make format-fix   # Auto-fix formatting and lint issues in custom_components/
+make lint         # ruff check custom_components (read-only)
+make format       # ruff format --check custom_components (read-only)
+```
+
+- **pre-commit**: `ruff check --fix` runs first, then `ruff format`, on staged `.py` files; fixes are re-staged automatically (`stage_fixed: true`).
+- **pre-push**: `make lint` + `make format` run on the full project.
+- **commit-msg**: `convco check` validates Conventional Commits format.
+
+To bootstrap a fresh checkout: `brew install lefthook convco && make setup`.
+
 ## Key dependencies
 
 | Dependency | Role |

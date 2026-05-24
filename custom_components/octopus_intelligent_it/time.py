@@ -74,15 +74,14 @@ class OctopusScheduleTimeEntity(OctopusDeviceEntity, TimeEntity):
             time_to = self._parse_time(sched_setting.get("timeTo", "23:59:00"))
             time_step: int = int(sched_setting.get("timeStep", 30))
 
-            if time_from and time_to:
-                if value < time_from or value > time_to:
-                    _LOGGER.warning(
-                        "Requested time %s for %s is outside allowed range [%s, %s]",
-                        value,
-                        self._day,
-                        time_from,
-                        time_to,
-                    )
+            if time_from and time_to and (value < time_from or value > time_to):
+                _LOGGER.warning(
+                    "Requested time %s for %s is outside allowed range [%s, %s]",
+                    value,
+                    self._day,
+                    time_from,
+                    time_to,
+                )
 
             # Validate step alignment (minutes must be a multiple of timeStep)
             total_minutes = value.hour * 60 + value.minute

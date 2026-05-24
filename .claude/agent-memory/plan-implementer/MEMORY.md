@@ -1,1 +1,2 @@
 - [Project: Octopus Intelligent IT Integration](project_octopus_integration.md) — HA custom integration for Octopus Energy Italia; GraphQL client with long-lived refresh token auth; Proxyman captures in requests/ are zip archives with base64-encoded JSON bodies
+- [Dev Tooling Setup](project_dev_tooling.md) — lefthook + Ruff + convco; pyproject.toml needs setuptools.packages.find config (where=custom_components) to avoid requests/ dir conflict

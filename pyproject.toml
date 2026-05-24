@@ -1,0 +1,27 @@
+[project]
+name = "octopus_intelligent_it"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[project.optional-dependencies]
+dev = ["ruff>=0.7.0"]
+
+[tool.setuptools.packages.find]
+where = ["custom_components"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+src = ["custom_components"]
+extend-exclude = [".venv", ".mypy_cache", ".ruff_cache", "requests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "C4", "PIE", "RUF", "ASYNC", "PTH"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"custom_components/octopus_intelligent_it/queries.py" = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

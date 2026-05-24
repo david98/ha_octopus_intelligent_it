@@ -78,6 +78,24 @@ HACS users will see the new version available after the release is published.
 
 ---
 
+## Development
+
+Requirements: Python 3.12+, `brew install lefthook convco`.
+
+```bash
+make setup        # Create .venv, install Ruff, install git hooks
+make lint         # Run ruff check on custom_components/
+make format       # Check formatting (ruff format --check)
+make format-fix   # Auto-fix formatting and lint issues
+make check        # Full pre-push gate: lint + format check
+```
+
+Pre-commit hooks auto-fix staged Python files via Ruff (format + lint with `--fix`) and re-stage the result.
+Pre-push runs the full `make lint` + `make format` gate.
+Commit messages must follow [Conventional Commits](https://www.conventionalcommits.org/) (enforced by `convco`).
+
+---
+
 ## Credits / Inspired by
 
 This integration was inspired by [`megakid/ha_octopus_intelligent`](https://github.com/megakid/ha_octopus_intelligent), which provided the HA scaffolding patterns used here (config flow, coordinator, entity platform structure).

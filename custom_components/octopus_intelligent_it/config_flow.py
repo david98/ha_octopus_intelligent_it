@@ -41,9 +41,7 @@ _STEP_USER_SCHEMA = vol.Schema(
 )
 
 
-class OctopusIntelligentItConfigFlow(
-    config_entries.ConfigFlow, domain=DOMAIN
-):
+class OctopusIntelligentItConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle the config flow for Octopus Intelligent (Italia)."""
 
     VERSION = 1

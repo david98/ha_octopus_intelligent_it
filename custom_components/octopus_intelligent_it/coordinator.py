@@ -34,9 +34,7 @@ class DeviceData:
     alerts: list[dict[str, Any]] = field(default_factory=list)
 
 
-class OctopusDataUpdateCoordinator(
-    DataUpdateCoordinator[dict[str, DeviceData]]
-):
+class OctopusDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceData]]):
     """Coordinator that polls all SmartFlex devices on an Octopus account."""
 
     def __init__(
@@ -117,12 +115,16 @@ class OctopusDataUpdateCoordinator(
                 "Octopus IT credentials expired or invalid"
             ) from err
         except KrakenError as err:
-            raise UpdateFailed(f"Octopus IT API error fetching settings: {err}") from err
+            raise UpdateFailed(
+                f"Octopus IT API error fetching settings: {err}"
+            ) from err
         except Exception as err:
             raise UpdateFailed(f"Unexpected error fetching settings: {err}") from err
 
         settings_by_id: dict[str, dict[str, Any]] = {}
-        for device_id, result in zip(settings_tasks.keys(), settings_results, strict=True):
+        for device_id, result in zip(
+            settings_tasks.keys(), settings_results, strict=True
+        ):
             devices_in_result: list[dict[str, Any]] = result.get("devices", [])
             settings_by_id[device_id] = (
                 devices_in_result[0].get("preferenceSetting", {})

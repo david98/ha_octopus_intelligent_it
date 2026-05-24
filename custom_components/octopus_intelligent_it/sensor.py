@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
@@ -173,7 +177,7 @@ class OctopusLatestAlertPublishedAtSensor(OctopusDeviceEntity, SensorEntity):
         try:
             dt = datetime.fromisoformat(raw)
             if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
+                dt = dt.replace(tzinfo=UTC)
             return dt
         except (ValueError, TypeError):
             return None

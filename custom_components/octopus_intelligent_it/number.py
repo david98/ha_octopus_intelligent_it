@@ -43,9 +43,7 @@ async def async_setup_entry(
         for day in DAYS_OF_WEEK:
             entities.append(OctopusScheduleMaxNumber(coordinator, device_id, day))
             if has_min_constraint:
-                entities.append(
-                    OctopusScheduleMinNumber(coordinator, device_id, day)
-                )
+                entities.append(OctopusScheduleMinNumber(coordinator, device_id, day))
 
     async_add_entities(entities)
 

@@ -1,0 +1,23 @@
+pre-commit:
+  commands:
+    ruff-lint:
+      glob: "*.py"
+      run: .venv/bin/ruff check --fix {staged_files}
+      stage_fixed: true
+    ruff-format:
+      glob: "*.py"
+      run: .venv/bin/ruff format {staged_files}
+      stage_fixed: true
+
+pre-push:
+  parallel: true
+  commands:
+    lint:
+      run: make lint
+    format-check:
+      run: make format
+
+commit-msg:
+  commands:
+    convco:
+      run: convco check --from-stdin < {1}
