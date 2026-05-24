@@ -138,6 +138,19 @@ make format       # ruff format --check custom_components (read-only)
 
 To bootstrap a fresh checkout: `brew install lefthook convco && make setup`.
 
+### CI (GitHub Actions)
+
+`.github/workflows/validate.yml` runs four parallel jobs on every push/PR to `main` and on `workflow_dispatch`:
+
+| Job | Command |
+|---|---|
+| `lint` | `ruff check custom_components` |
+| `format` | `ruff format --check custom_components` |
+| `hacs` | `hacs/action@main` (HACS compliance check) |
+| `hassfest` | `home-assistant/actions/hassfest@master` (HA integration validation) |
+
+CI is the authoritative gate; lefthook is the local fast path. Both must pass before merging.
+
 ## Key dependencies
 
 | Dependency | Role |
