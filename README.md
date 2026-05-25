@@ -1,6 +1,5 @@
 # Octopus Intelligent (Italia) — Home Assistant Integration
 
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
 [![Built with Claude Code](https://img.shields.io/badge/Built%20with-Claude%20Code-blueviolet?logo=anthropic)](https://claude.ai/code)
 
 > **Note:** This project was developed with the assistance of [Claude Code](https://claude.ai/code) (Anthropic's AI coding assistant). All code has been reviewed and validated by a human developer.
@@ -39,6 +38,8 @@ directly from HA or automations.
 ---
 
 ## Installation via HACS
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=david98&repository=ha_octopus_intelligent_it&category=integration)
 
 1. Open HACS in your Home Assistant instance.
 2. Click the three-dot menu (top right) and choose **Custom repositories**.
