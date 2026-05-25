@@ -70,4 +70,12 @@ REMAINING after eighth review (iteration 1 fix run, May 2026):
 - time.py async_set_value: validation only emits warnings; writes always proceed to the API regardless of range/alignment violations (carry-over — not new). LOW.
 - time.py L82-83: `from_minutes` falls back to `0` when `time_from` is None, but `time_from` is derived from `_parse_time("00:00:00")` which cannot fail — inconsistency in None guard. LOW.
 
+**Release automation added (ninth review, May 2026)**:
+- `.release-please-config.json`: uses `release-type: simple` + `extra-files` with `jsonpath: $.version` to bump manifest.json. Valid syntax confirmed against release-please source.
+- `.release-please-manifest.json`: version `0.1.0` matches manifest.json. Correct.
+- `.github/workflows/release.yml`: Missing YAML document-start `---` (yamllint warns). `on:` is unquoted (same yamllint `truthy` warning as validate.yml). One `run:` step line exceeds 80-char yamllint default (96 chars). No explicit `token:` in release-please-action step — relies on GITHUB_TOKEN default (correct for public repos).
+- `.github/workflows/release.yml`: `issues: write` permission declared but not strictly required — CLAUDE.md docs say only `contents: write` + `pull-requests: write` needed. Not harmful but unnecessary.
+- `hacs.json`: `zip_release: true` + `filename: octopus_intelligent_it.zip` are valid HACS fields and correctly reference the zip asset created by the workflow.
+- `CHANGELOG.md`: Only `# Changelog` header — placeholder for release-please to append to. Correct bootstrap pattern.
+
 **How to apply**: Check for these patterns on every review of this integration.

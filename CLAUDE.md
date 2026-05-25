@@ -151,6 +151,39 @@ To bootstrap a fresh checkout: `brew install lefthook convco && make setup`.
 
 CI is the authoritative gate; lefthook is the local fast path. Both must pass before merging.
 
+## Release process
+
+This integration uses [`release-please`](https://github.com/googleapis/release-please) to automate the release lifecycle. **No manual version bumping is required.**
+
+### How it works
+
+1. Every merge to `main` triggers the `release.yml` workflow.
+2. `release-please` reads all commits since the last tag and opens (or updates) a **Release PR** — automatically titled `chore(main): release X.Y.Z`.
+3. The Release PR contains:
+   - Bump of `"version"` in `custom_components/octopus_intelligent_it/manifest.json`.
+   - Update of `.release-please-manifest.json`.
+   - New entries in `CHANGELOG.md`.
+4. **To cut a release**: review and merge the Release PR. This triggers a second workflow run that:
+   - Creates the git tag `vX.Y.Z`.
+   - Creates a GitHub Release.
+   - Attaches `octopus_intelligent_it.zip` (built from `custom_components/octopus_intelligent_it/`) as a Release asset.
+5. HACS is configured with `zip_release: true` and `filename: octopus_intelligent_it.zip` in `hacs.json`, so it downloads the zip asset instead of the source archive.
+
+### Semver rules (driven by Conventional Commits)
+
+| Commit type | Version bump |
+|---|---|
+| `fix:` | patch |
+| `feat:` | minor |
+| `feat!:` / `BREAKING CHANGE:` | major |
+
+### Developer workflow
+
+- Write normal feature/fix branches with Conventional Commits (enforced by convco + lefthook).
+- Merge PRs to `main` as usual.
+- When ready to release, find and merge the open Release PR on GitHub.
+- Done — no manual `git tag`, no manual `gh release create`.
+
 ## Key dependencies
 
 | Dependency | Role |

@@ -1,0 +1,17 @@
+{
+  "release-type": "simple",
+  "packages": {
+    ".": {
+      "package-name": "ha-octopus-intelligent-it",
+      "include-component-in-tag": false,
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "custom_components/octopus_intelligent_it/manifest.json",
+          "jsonpath": "$.version"
+        }
+      ]
+    }
+  }
+}
