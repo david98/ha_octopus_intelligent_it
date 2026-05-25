@@ -99,4 +99,21 @@ REMAINING after thirteenth review (iteration 1 fix run, May 2026):
 - CONTRIBUTING.md L86: Arch section says `lefthook` is in community/extra repo, but Makefile L83 passes `lefthook` as the pacman arg. This is CONSISTENT — lefthook IS in Arch community repo (valid).
 - CONTRIBUTING.md L55-56: `sudo apt-get install -y gitleaks || true` — gitleaks availability in standard Ubuntu/Debian repos varies by version; `|| true` silently swallows install failure on systems where the package doesn't exist. This is intentional (best-effort) but inconsistent with the pattern used elsewhere. LOW.
 
+**HACS zip fix (fourteenth review, May 2026 — release.yml)**:
+- `.github/workflows/release.yml` Build step: changed from `cd custom_components && zip -r ../octopus_intelligent_it.zip octopus_intelligent_it` to `cd custom_components/octopus_intelligent_it && zip -r "$GITHUB_WORKSPACE/octopus_intelligent_it.zip" .` — correct fix for root-level zip entries.
+- HIGH: `__pycache__/` directories are included in the zip (no exclusion pattern). HACS installs from the zip; compiled `.pyc` files bloat the archive and can cause issues if Python version on the HA host differs from the build environment. Add `--exclude "*.pyc" --exclude "*/__pycache__/*"` to the zip command.
+- MEDIUM: Upload step uses `octopus_intelligent_it.zip` (relative path) instead of `"$GITHUB_WORKSPACE/octopus_intelligent_it.zip"`. Since the checkout step sets the working directory to `$GITHUB_WORKSPACE` implicitly and the `gh release upload` run step starts at `$GITHUB_WORKSPACE`, this works, but it is inconsistent with how the zip is written (absolute path) and fragile if a future step changes CWD.
+- MEDIUM: `on:` is still unquoted (yamllint truthy warning — carry-over from ninth review). Now there is also a missing `---` document-start (carry-over). `issues: write` permission is still present but not needed (carry-over).
+- LOW: Build step has no `name:` key — shows as an unnamed step in Actions UI.
+
+**Fifteenth review (May 2026 — release.yml final cleanup)**:
+- `---` document-start ADDED (L1). RESOLVED.
+- `"on":` is now quoted (L4). RESOLVED.
+- Upload path now uses `"$GITHUB_WORKSPACE/octopus_intelligent_it.zip"` absolute path. RESOLVED.
+- `--exclude "*.pyc"` and `--exclude "*.pyo"` added. `.pyc`/`.pyo` are gitignored so a CI checkout will never have them — these patterns are defensive-only (LOW, not HIGH anymore).
+- `--exclude "*/__pycache__/*"` was REMOVED by the plan-implementer. The `__pycache__/` directory entry itself will still appear in the zip if a future runner ever has compiled artifacts on disk. Since `.gitignore` covers `__pycache__/`, a fresh checkout produces no compiled files — the omission is acceptable in practice but the zip pattern is incomplete by convention.
+- REMAINING MEDIUM: `issues: write` permission is present but not required by release-please-action or gh CLI (only `contents: write` and `pull-requests: write` are needed).
+- REMAINING LOW: Action tags unpinned (`googleapis/release-please-action@v4`, `actions/checkout@v4`) — not SHAs.
+- REMAINING LOW: Build step still lacks a `name:` key (shows as unnamed step in UI).
+
 **How to apply**: Check for these patterns on every review of this integration.

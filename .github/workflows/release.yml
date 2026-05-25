@@ -10,7 +10,6 @@ name: Release
 permissions:
   contents: write
   pull-requests: write
-  issues: write
 
 jobs:
   release-please:
@@ -34,11 +33,13 @@ jobs:
 
       - name: Build integration zip
         run: |
-          cd custom_components
-          zip -r ../octopus_intelligent_it.zip octopus_intelligent_it
+          cd custom_components/octopus_intelligent_it
+          zip -r "$GITHUB_WORKSPACE/octopus_intelligent_it.zip" . \
+            --exclude "*.pyc" \
+            --exclude "*.pyo"
 
       - name: Upload zip to GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ needs.release-please.outputs.tag_name }}
-        run: gh release upload "$TAG" octopus_intelligent_it.zip --clobber
+        run: gh release upload "$TAG" "$GITHUB_WORKSPACE/octopus_intelligent_it.zip" --clobber
