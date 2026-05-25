@@ -8,6 +8,8 @@ pre-commit:
       glob: "*.py"
       run: .venv/bin/ruff format {staged_files}
       stage_fixed: true
+    gitleaks:
+      run: gitleaks protect --staged --redact --verbose --no-banner
 
 pre-push:
   parallel: true

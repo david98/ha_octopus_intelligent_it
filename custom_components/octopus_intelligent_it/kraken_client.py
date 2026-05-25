@@ -10,9 +10,20 @@ from typing import Any
 
 import jwt
 
+from .const import INTEGRATION_USER_AGENT, KRAKEN_FLAPJACK
 from .queries import LOGIN
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _redact_email(email: str) -> str:
+    """Mask the local part of an email for log output (e.g. d***@gmail.com)."""
+    if "@" not in email:
+        return "***"
+    local, _, domain = email.partition("@")
+    visible = local[:1] if local else ""
+    return f"{visible}***@{domain}"
+
 
 # Kraken error codes
 _AUTH_ERROR_CODES = {"KT-CT-1135", "KT-CT-1134"}
@@ -79,7 +90,7 @@ class KrakenClient:
         headers: dict[str, str] = {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "User-Agent": "ha-octopus-intelligent-it/0.1.0",
+            "User-Agent": INTEGRATION_USER_AGENT,
         }
         if auth and self._access_token:
             # Kraken uses the raw JWT without a "Bearer " prefix
@@ -300,7 +311,9 @@ class KrakenClient:
             KrakenError: On network errors.
         """
         _LOGGER.debug(
-            "[login] email/password login → url=%s email=%s", graphql_url, email
+            "[login] email/password login → url=%s email=%s",
+            graphql_url,
+            _redact_email(email),
         )
 
         _apollo_extensions = {
@@ -309,8 +322,8 @@ class KrakenClient:
         _base_headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "User-Agent": "OctoAppClient/4.127.1 (IOS 26.4.2; iPhone)",
-            "X-Kraken-Flapjack": "d87595aac6aff50a6012190b5a90161f4bd7afde5c0a0051b471054b39296d0e",
+            "User-Agent": INTEGRATION_USER_AGENT,
+            "X-Kraken-Flapjack": KRAKEN_FLAPJACK,
         }
 
         payload = {

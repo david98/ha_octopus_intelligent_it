@@ -70,6 +70,14 @@ REMAINING after eighth review (iteration 1 fix run, May 2026):
 - time.py async_set_value: validation only emits warnings; writes always proceed to the API regardless of range/alignment violations (carry-over — not new). LOW.
 - time.py L82-83: `from_minutes` falls back to `0` when `time_from` is None, but `time_from` is derived from `_parse_time("00:00:00")` which cannot fail — inconsistency in None guard. LOW.
 
+**Security audit cleanup (tenth review, May 2026)**:
+- const.py: KRAKEN_USER_AGENT and KRAKEN_FLAPJACK extracted correctly. Header key string "X-Kraken-Flapjack" NOT extracted to a constant (MEDIUM).
+- kraken_client.py L93: `_graphql_raw` hardcoded `"ha-octopus-intelligent-it/0.1.0"` User-Agent has been extracted to `INTEGRATION_USER_AGENT` in const.py. RESOLVED (eleventh review, May 2026).
+- kraken_client.py L319/L322: Local variables `_apollo_extensions` and `_base_headers` inside `login_with_credentials` use leading underscores — misleading convention for local variables (LOW).
+- lefthook.yml: `gitleaks` pre-commit command has no `glob` filter — runs on every commit regardless of file type, adding latency on non-secret-bearing changes (LOW).
+- Makefile L19: `brew install gitleaks` auto-installs silently on non-macOS CI (brew not available there). `gitleaks` warnings for lefthook/convco follow a human-readable pattern but gitleaks install is silent and will fail on Linux CI. Should emit a WARNING message similar to the lefthook/convco pattern (LOW).
+- gitleaks detect confirms KRAKEN_FLAPJACK 64-char hex does NOT trigger a false positive — confirmed safe.
+
 **Release automation added (ninth review, May 2026)**:
 - `.release-please-config.json`: uses `release-type: simple` + `extra-files` with `jsonpath: $.version` to bump manifest.json. Valid syntax confirmed against release-please source.
 - `.release-please-manifest.json`: version `0.1.0` matches manifest.json. Correct.

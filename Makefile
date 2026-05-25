@@ -16,6 +16,7 @@ setup:
 	@if ! command -v convco > /dev/null 2>&1; then \
 		echo "WARNING: convco not found. Install with: brew install lefthook convco"; \
 	fi
+	@command -v gitleaks >/dev/null 2>&1 || brew install gitleaks
 	@echo "Setup complete."
 
 lint:
