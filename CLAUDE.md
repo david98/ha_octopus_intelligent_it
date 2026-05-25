@@ -136,7 +136,7 @@ make format       # ruff format --check custom_components (read-only)
 - **pre-push**: `make lint` + `make format` run on the full project.
 - **commit-msg**: `convco check` validates Conventional Commits format.
 
-To bootstrap a fresh checkout: `brew install lefthook convco gitleaks && make setup`.
+To bootstrap a fresh checkout: `make setup` (see [CONTRIBUTING.md](CONTRIBUTING.md) for manual install commands per OS).
 
 ### CI (GitHub Actions)
 

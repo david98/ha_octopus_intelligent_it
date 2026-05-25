@@ -22,8 +22,8 @@ directly from HA or automations.
   - **Sensors**: status, provider, grid export mode, target type, alert count, latest alert message/time.
   - **Binary sensors**: suspended flag, charging duration capped, has-alerts.
   - **Select**: operating mode (`CHARGE`, etc.), charge unit (`PERCENTAGE` / `KILOWATT_HOURS`).
-  - **Time** (7 × per day): target readiness time per day of the week.
-  - **Number** (7 × per day): max charge target; min charge target (when supported by the device).
+  - **Time**: single target readiness time, broadcast to all 7 schedule days.
+  - **Number**: single max charge target, broadcast to all 7 schedule days.
 - **Configurable polling interval** (default 5 min, range 1–60 min) via the options flow.
 - **Automatic token rotation**: when the API rotates the refresh token the new value is persisted without requiring re-authentication.
 - **Re-auth flow**: if the refresh token expires HA will raise a re-auth notification allowing you to log in again without removing the integration.
@@ -71,33 +71,25 @@ Then restart Home Assistant and follow step 7 above.
 
 ## Release process
 
-To publish a new version:
+Releases are fully automated via [release-please](https://github.com/googleapis/release-please).
+When ready to release, find and merge the open Release PR on GitHub (titled
+`chore(main): release X.Y.Z`). No manual version bumping or tagging is required.
 
-1. Bump `version` in `custom_components/octopus_intelligent_it/manifest.json`.
-2. Commit the change: `git commit -am "chore: bump version to X.Y.Z"`.
-3. Create a git tag: `git tag vX.Y.Z`.
-4. Push tag: `git push origin vX.Y.Z`.
-5. Create a **GitHub Release** from the tag with a changelog describing the changes.
-
-HACS users will see the new version available after the release is published.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full release flow description.
 
 ---
 
 ## Development
 
-Requirements: Python 3.12+, `brew install lefthook convco`.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions, code style, commit conventions, and the release flow.
+
+Quick reference:
 
 ```bash
-make setup        # Create .venv, install Ruff, install git hooks
-make lint         # Run ruff check on custom_components/
-make format       # Check formatting (ruff format --check)
-make format-fix   # Auto-fix formatting and lint issues
+make setup        # Auto-detect OS, install system tools, create .venv, install git hooks
 make check        # Full pre-push gate: lint + format check
+make format-fix   # Auto-fix formatting and lint issues
 ```
-
-Pre-commit hooks auto-fix staged Python files via Ruff (format + lint with `--fix`) and re-stage the result.
-Pre-push runs the full `make lint` + `make format` gate.
-Commit messages must follow [Conventional Commits](https://www.conventionalcommits.org/) (enforced by `convco`).
 
 ---
 
