@@ -10,7 +10,7 @@ from typing import Any
 
 import jwt
 
-from .const import INTEGRATION_USER_AGENT, KRAKEN_FLAPJACK
+from .const import INTEGRATION_USER_AGENT
 from .queries import LOGIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -323,7 +323,6 @@ class KrakenClient:
             "Content-Type": "application/json",
             "Accept": "application/json",
             "User-Agent": INTEGRATION_USER_AGENT,
-            "X-Kraken-Flapjack": KRAKEN_FLAPJACK,
         }
 
         payload = {
