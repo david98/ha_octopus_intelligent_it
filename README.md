@@ -16,14 +16,14 @@ directly from HA or automations.
 
 ## Features
 
-- **Config flow**: email/password login → only a long-lived refresh token (~6 months) is persisted; credentials are discarded immediately after setup.
+- **Config flow**: email/password login → only a long-lived refresh token (~12 months) is persisted; credentials are discarded immediately after setup.
 - **Multi-account support**: if your user has more than one account number, a second step lets you pick the right one.
 - **Per-device entities** for every SmartFlex device on the account:
-  - **Sensors**: status, provider, grid export mode, target type, alert count, latest alert message/time.
-  - **Binary sensors**: suspended flag, charging duration capped, has-alerts.
-  - **Select**: operating mode (`CHARGE`, etc.), charge unit (`PERCENTAGE` / `KILOWATT_HOURS`).
-  - **Time**: single target readiness time, broadcast to all 7 schedule days.
-  - **Number**: single max charge target, broadcast to all 7 schedule days.
+  - **Sensors**: status, provider, grid export, target type, alert count, latest alert message, latest alert time.
+  - **Binary sensors**: suspended, charging duration capped, has alerts.
+  - **Select**: mode (options returned dynamically by the API), charge unit (`PERCENTAGE` / `KILOWATT_HOURS`).
+  - **Time**: target time — single value broadcast to all 7 schedule days.
+  - **Number**: max charge — single value broadcast to all 7 schedule days.
 - **Configurable polling interval** (default 5 min, range 1–60 min) via the options flow.
 - **Automatic token rotation**: when the API rotates the refresh token the new value is persisted without requiring re-authentication.
 - **Re-auth flow**: if the refresh token expires HA will raise a re-auth notification allowing you to log in again without removing the integration.
@@ -64,7 +64,7 @@ Then restart Home Assistant and follow step 7 above.
 
 ## Auth notes
 
-- **Long-lived refresh token**: stored in the config entry, valid for approximately 6 months. The integration automatically persists rotated tokens so you should rarely need to re-authenticate.
+- **Long-lived refresh token**: stored in the config entry, valid for approximately 12 months. The integration automatically persists rotated tokens so you should rarely need to re-authenticate.
 - **Re-auth**: if the token expires (e.g. you revoked it from the Octopus app), Home Assistant will show a re-auth notification. Click it, enter your credentials, and the integration resumes without any data loss.
 
 ---

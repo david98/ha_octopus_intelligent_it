@@ -86,4 +86,17 @@ REMAINING after eighth review (iteration 1 fix run, May 2026):
 - `hacs.json`: `zip_release: true` + `filename: octopus_intelligent_it.zip` are valid HACS fields and correctly reference the zip asset created by the workflow.
 - `CHANGELOG.md`: Only `# Changelog` header — placeholder for release-please to append to. Correct bootstrap pattern.
 
+**Cross-platform dev setup (twelfth review, May 2026 — Makefile + CONTRIBUTING.md)**:
+FIXED in thirteenth review (iteration 1 fix run, May 2026):
+- Makefile lefthook apt arg changed to `-` — now emits [WARN] and defers to CONTRIBUTING.md. RESOLVED.
+- CONTRIBUTING.md Debian lefthook section updated to canonical Cloudsmith script (`https://dl.cloudsmith.io/public/evilmartians/lefthook/setup.deb.sh`). RESOLVED.
+- CONTRIBUTING.md suspicious `cargo-install` URL removed from convco instructions. RESOLVED.
+- README.md release section updated to describe release-please automation. RESOLVED.
+- README.md Time/Number entity descriptions corrected to "single … broadcast to all 7 schedule days". RESOLVED.
+
+REMAINING after thirteenth review (iteration 1 fix run, May 2026):
+- Makefile L85: `gitleaks` pacman arg is `-` (Arch Linux). CONTRIBUTING.md L86-90 says `gitleaks` is an AUR package (not in community/extra repo), so the `-` is correct — the [WARN] message correctly defers to CONTRIBUTING.md. No action needed. CLOSED (false positive from prior review).
+- CONTRIBUTING.md L86: Arch section says `lefthook` is in community/extra repo, but Makefile L83 passes `lefthook` as the pacman arg. This is CONSISTENT — lefthook IS in Arch community repo (valid).
+- CONTRIBUTING.md L55-56: `sudo apt-get install -y gitleaks || true` — gitleaks availability in standard Ubuntu/Debian repos varies by version; `|| true` silently swallows install failure on systems where the package doesn't exist. This is intentional (best-effort) but inconsistent with the pattern used elsewhere. LOW.
+
 **How to apply**: Check for these patterns on every review of this integration.
