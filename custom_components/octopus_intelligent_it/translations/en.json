@@ -48,7 +48,7 @@
   },
   "entity": {
     "sensor": {
-      "status": { "name": "Status" },
+      "next_charge": { "name": "Next charge" },
       "provider": { "name": "Provider" },
       "grid_export": { "name": "Grid export" },
       "target_type": { "name": "Target type" },
@@ -59,7 +59,8 @@
     "binary_sensor": {
       "suspended": { "name": "Suspended" },
       "charging_duration_capped": { "name": "Charging duration capped" },
-      "has_alerts": { "name": "Has alerts" }
+      "has_alerts": { "name": "Has alerts" },
+      "smart_charging": { "name": "Smart charging active" }
     },
     "select": {
       "mode": { "name": "Mode" },
@@ -70,6 +71,9 @@
     },
     "number": {
       "max_charge": { "name": "Max charge" }
+    },
+    "calendar": {
+      "charging_plan": { "name": "Charging plan" }
     }
   }
 }

@@ -18,11 +18,12 @@ directly from HA or automations.
 - **Config flow**: email/password login → only a long-lived refresh token (~12 months) is persisted; credentials are discarded immediately after setup.
 - **Multi-account support**: if your user has more than one account number, a second step lets you pick the right one.
 - **Per-device entities** for every SmartFlex device on the account:
-  - **Sensors**: status, provider, grid export, target type, alert count, latest alert message, latest alert time.
-  - **Binary sensors**: suspended, charging duration capped, has alerts.
-  - **Select**: mode (options returned dynamically by the API), charge unit (`PERCENTAGE` / `KILOWATT_HOURS`).
+  - **Sensors**: next charge (timestamp of the next Octopus-planned dispatch), provider, grid export, target type, alert count, latest alert message, latest alert time.
+  - **Binary sensors**: smart charging active (on during a planned dispatch window); suspended, charging duration capped, has alerts (diagnostic).
+  - **Select**: mode (options returned dynamically by the API), charge unit (`PERCENTAGE` / `KILOWATT_HOURS`) — both disabled by default in the entity registry.
   - **Time**: target time — single value broadcast to all 7 schedule days.
   - **Number**: max charge — single value broadcast to all 7 schedule days.
+  - **Calendar**: charging plan — each Octopus-planned dispatch window is a calendar event with start/end and kWh delta.
 - **Configurable polling interval** (default 5 min, range 1–60 min) via the options flow.
 - **Automatic token rotation**: when the API rotates the refresh token the new value is persisted without requiring re-authentication.
 - **Re-auth flow**: if the refresh token expires HA will raise a re-auth notification allowing you to log in again without removing the integration.

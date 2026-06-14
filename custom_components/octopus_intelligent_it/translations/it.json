@@ -48,7 +48,7 @@
   },
   "entity": {
     "sensor": {
-      "status": { "name": "Stato" },
+      "next_charge": { "name": "Prossima ricarica" },
       "provider": { "name": "Provider" },
       "grid_export": { "name": "Esportazione rete" },
       "target_type": { "name": "Tipo di obiettivo" },
@@ -59,7 +59,8 @@
     "binary_sensor": {
       "suspended": { "name": "Sospeso" },
       "charging_duration_capped": { "name": "Durata ricarica limitata" },
-      "has_alerts": { "name": "Ha avvisi" }
+      "has_alerts": { "name": "Ha avvisi" },
+      "smart_charging": { "name": "Ricarica smart attiva" }
     },
     "select": {
       "mode": { "name": "Modalità" },
@@ -70,6 +71,9 @@
     },
     "number": {
       "max_charge": { "name": "Ricarica massima" }
+    },
+    "calendar": {
+      "charging_plan": { "name": "Piano di ricarica" }
     }
   }
 }

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any
 
+import homeassistant.util.dt as dt_util
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -31,7 +33,7 @@ async def async_setup_entry(
     for device_id in coordinator.data:
         entities.extend(
             [
-                OctopusStatusSensor(coordinator, device_id),
+                OctopusNextChargeSensor(coordinator, device_id),
                 OctopusProviderSensor(coordinator, device_id),
                 OctopusGridExportSensor(coordinator, device_id),
                 OctopusTargetTypeSensor(coordinator, device_id),
@@ -44,19 +46,75 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class OctopusStatusSensor(OctopusDeviceEntity, SensorEntity):
-    """Sensor reporting the current device status (e.g. LIVE, SUSPENDED)."""
+class OctopusNextChargeSensor(OctopusDeviceEntity, SensorEntity):
+    """Sensor reporting the start time of the next planned smart-charge window."""
 
-    _attr_translation_key = "status"
+    _attr_translation_key = "next_charge"
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
 
     def __init__(
         self, coordinator: OctopusDataUpdateCoordinator, device_id: str
     ) -> None:
-        super().__init__(coordinator, device_id, "status")
+        super().__init__(coordinator, device_id, "next_charge")
+        self._resolved: tuple[datetime, datetime, dict] | None = (
+            self._next_dispatch_node()
+        )
+
+    def _handle_coordinator_update(self) -> None:
+        """Resolve the next dispatch node once per coordinator update."""
+        self._resolved = self._next_dispatch_node()
+        super()._handle_coordinator_update()
+
+    def _next_dispatch_node(self) -> tuple[datetime, datetime, dict] | None:
+        """Return (start_dt, end_dt, node) for the earliest dispatch whose end is in the future.
+
+        Parses both start and end as ISO datetimes (with UTC fallback for naive
+        timestamps). Sorts candidates by parsed start and returns the winning
+        tuple, or ``None`` if no such dispatch exists.
+        """
+        now = dt_util.utcnow()
+        candidates: list[tuple[datetime, datetime, dict]] = []
+        for node in self._device_data.dispatches:
+            raw_start = node.get("start")
+            raw_end = node.get("end")
+            if raw_start is None or raw_end is None:
+                continue
+            try:
+                end_dt = datetime.fromisoformat(raw_end)
+                if end_dt.tzinfo is None:
+                    end_dt = end_dt.replace(tzinfo=UTC)
+                if end_dt <= now:
+                    continue
+                start_dt = datetime.fromisoformat(raw_start)
+                if start_dt.tzinfo is None:
+                    start_dt = start_dt.replace(tzinfo=UTC)
+                candidates.append((start_dt, end_dt, node))
+            except (ValueError, TypeError):
+                continue
+        if not candidates:
+            return None
+        candidates.sort(key=lambda t: t[0])
+        return candidates[0]
 
     @property
-    def native_value(self) -> str | None:
-        return self._device_data.device.get("status", {}).get("current")
+    def native_value(self) -> datetime | None:
+        """Return the start of the earliest dispatch whose end is still in the future."""
+        if self._resolved is None:
+            return None
+        start_dt, _end_dt, _node = self._resolved
+        return start_dt
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """Return energy_kwh and end time for the next dispatch slot."""
+        if self._resolved is None:
+            return None
+        _start_dt, end_dt, node = self._resolved
+        raw_delta = node.get("delta")
+        return {
+            "energy_kwh": float(raw_delta) if raw_delta is not None else None,
+            "end": end_dt,
+        }
 
 
 class OctopusProviderSensor(OctopusDeviceEntity, SensorEntity):

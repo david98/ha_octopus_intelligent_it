@@ -173,3 +173,17 @@ query GetSmartFlexDeviceAlerts($accountNumber: String!) {
   }
 }
 """
+
+GET_SMART_FLEX_PLANNED_DISPATCHES = """
+query GetSmartFlexPlannedDispatches($accountNumber: String!) {
+  plannedDispatches(accountNumber: $accountNumber) {
+    start
+    end
+    delta
+    meta {
+      source
+      location
+    }
+  }
+}
+"""

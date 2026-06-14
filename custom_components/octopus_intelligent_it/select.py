@@ -42,6 +42,7 @@ class OctopusModeSelect(OctopusDeviceEntity, SelectEntity):
     """Select entity for choosing the SmartFlex device operating mode."""
 
     _attr_translation_key = "mode"
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self, coordinator: OctopusDataUpdateCoordinator, device_id: str
@@ -73,6 +74,7 @@ class OctopusUnitSelect(OctopusDeviceEntity, SelectEntity):
     """Select entity for choosing the charging unit (% or kWh)."""
 
     _attr_translation_key = "unit"
+    _attr_entity_registry_enabled_default = False
 
     def __init__(
         self, coordinator: OctopusDataUpdateCoordinator, device_id: str

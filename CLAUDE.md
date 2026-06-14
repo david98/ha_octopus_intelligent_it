@@ -21,11 +21,12 @@ custom_components/
     ├── config_flow.py           # Config flow (email/pwd → refresh token) + options flow
     ├── coordinator.py           # DataUpdateCoordinator: polls all device data
     ├── entity.py                # Base entity class (DeviceInfo, availability, helpers)
-    ├── sensor.py                # Read-only sensors (status, provider, alerts, …)
-    ├── binary_sensor.py         # Boolean sensors (suspended, capped, has_alerts)
-    ├── select.py                # Writable selects (mode, unit)
+    ├── sensor.py                # Read-only sensors (next_charge, provider, alerts, …)
+    ├── binary_sensor.py         # Boolean sensors (smart_charging, suspended, capped, has_alerts)
+    ├── select.py                # Writable selects (mode, unit — disabled by default)
     ├── time.py                  # Writable time entity (single target_time per device, broadcast to all 7 days)
     ├── number.py                # Writable number entity (single max_charge per device, broadcast to all 7 days)
+    ├── calendar.py              # Calendar entity showing Octopus-planned dispatch windows
     ├── strings.json             # EN translation source of truth
     └── translations/
         ├── en.json
@@ -58,8 +59,9 @@ Wraps `aiohttp.ClientSession`. Key points:
 - `GetSmartFlexDevicePreferences` (all devices)
 - `GetSmartFlexDeviceAlerts` (all devices)
 - `GetSmartFlexDevicePreferenceSettings` (one call per device — requires `deviceId`)
+- `GetSmartFlexPlannedDispatches` (account-level, isolated — failure returns `[]`, never raises `UpdateFailed`)
 
-Merges results into `dict[device_id, DeviceData]`.
+Merges results into `dict[device_id, DeviceData]`. Planned dispatches are account-scoped (no per-device key) so the same list is broadcast to every device's `DeviceData.dispatches`.
 
 `async_set_device_preferences()` accepts `time: str | None` and `max_charge: float | None` keyword args. It broadcasts the same value to all 7 days in the schedule payload, never includes a `min` field, and omits `mode`/`unit` from the mutation when they are `None`. Calls `SetSmartFlexDevicePreferences`, then triggers a refresh.
 
@@ -67,11 +69,14 @@ Merges results into `dict[device_id, DeviceData]`.
 
 | Platform | Entities per device |
 |---|---|
-| `sensor` | 7 (status, provider, gridExport, targetType, alertsCount, latestAlertMsg, latestAlertTime) |
-| `binary_sensor` | 3 (suspended, chargingDurationCapped, hasAlerts) |
-| `select` | 2 (mode, unit) |
+| `sensor` | 7 (next_charge, provider, gridExport, targetType, alertsCount, latestAlertMsg, latestAlertTime) |
+| `binary_sensor` | 4 (smart_charging, suspended★, chargingDurationCapped★, hasAlerts★) — ★ = diagnostic |
+| `select` | 2 (mode, unit — **disabled by default** in the entity registry) |
 | `time` | 1 (`target_time` — value broadcast to all 7 schedule days) |
 | `number` | 1 (`max_charge` — value broadcast to all 7 schedule days) |
+| `calendar` | 1 (`charging_plan` — Octopus-planned dispatch windows, one event per slot) |
+
+Platforms registered in `PLATFORMS`: `SENSOR`, `BINARY_SENSOR`, `SELECT`, `TIME`, `NUMBER`, `CALENDAR`.
 
 ## Dev workflow
 
