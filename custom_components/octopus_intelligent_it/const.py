@@ -37,6 +37,7 @@ PLATFORMS: list[Platform] = [
     Platform.SELECT,
     Platform.TIME,
     Platform.NUMBER,
+    Platform.CALENDAR,
 ]
 
 

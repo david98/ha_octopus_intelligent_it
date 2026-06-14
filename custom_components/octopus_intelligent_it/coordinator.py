@@ -19,6 +19,7 @@ from .queries import (
     GET_SMART_FLEX_DEVICE_PREFERENCE_SETTINGS,
     GET_SMART_FLEX_DEVICE_PREFERENCES,
     GET_SMART_FLEX_DEVICES,
+    GET_SMART_FLEX_PLANNED_DISPATCHES,
     SET_SMART_FLEX_DEVICE_PREFERENCES,
 )
 
@@ -33,6 +34,7 @@ class DeviceData:
     preferences: dict[str, Any]
     settings: dict[str, Any]
     alerts: list[dict[str, Any]] = field(default_factory=list)
+    dispatches: list[dict[str, Any]] = field(default_factory=list)
 
 
 class OctopusDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceData]]):
@@ -53,6 +55,23 @@ class OctopusDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceData]])
         )
         self._client = client
         self._account_number = account_number
+
+    async def _async_fetch_dispatches(self) -> list[dict[str, Any]]:
+        """Fetch the account-level planned dispatches, isolated from the main poll.
+
+        Returns an empty list on any error so that a rejected or absent query
+        never raises ``UpdateFailed``.
+        """
+        try:
+            result = await self._client.graphql(
+                GET_SMART_FLEX_PLANNED_DISPATCHES,
+                variables={"accountNumber": self._account_number},
+                operation_name="GetSmartFlexPlannedDispatches",
+            )
+            return result.get("plannedDispatches") or []
+        except Exception as err:
+            _LOGGER.debug("planned dispatches unavailable: %s", err)
+            return []
 
     async def _async_update_data(self) -> dict[str, DeviceData]:
         """Fetch all device data in parallel and merge into a keyed dict."""
@@ -133,12 +152,16 @@ class OctopusDataUpdateCoordinator(DataUpdateCoordinator[dict[str, DeviceData]])
                 else {}
             )
 
+        # Fetch planned dispatches once for the account (isolated — never raises UpdateFailed)
+        dispatches_list = await self._async_fetch_dispatches()
+
         return {
             dev["id"]: DeviceData(
                 device=dev,
                 preferences=prefs_by_id.get(dev["id"], {}),
                 settings=settings_by_id.get(dev["id"], {}),
                 alerts=alerts_by_id.get(dev["id"], []),
+                dispatches=dispatches_list,
             )
             for dev in raw_devices
         }

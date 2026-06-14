@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
+import homeassistant.util.dt as dt_util
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
@@ -31,6 +34,7 @@ async def async_setup_entry(
                 OctopusSuspendedBinarySensor(coordinator, device_id),
                 OctopusChargingDurationCappedBinarySensor(coordinator, device_id),
                 OctopusHasAlertsBinarySensor(coordinator, device_id),
+                OctopusSmartChargingBinarySensor(coordinator, device_id),
             ]
         )
 
@@ -42,6 +46,7 @@ class OctopusSuspendedBinarySensor(OctopusDeviceEntity, BinarySensorEntity):
 
     _attr_translation_key = "suspended"
     _attr_device_class = BinarySensorDeviceClass.PROBLEM
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(
         self, coordinator: OctopusDataUpdateCoordinator, device_id: str
@@ -83,6 +88,7 @@ class OctopusHasAlertsBinarySensor(OctopusDeviceEntity, BinarySensorEntity):
 
     _attr_translation_key = "has_alerts"
     _attr_device_class = BinarySensorDeviceClass.PROBLEM
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(
         self, coordinator: OctopusDataUpdateCoordinator, device_id: str
@@ -92,3 +98,37 @@ class OctopusHasAlertsBinarySensor(OctopusDeviceEntity, BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         return len(self._device_data.alerts) > 0
+
+
+class OctopusSmartChargingBinarySensor(OctopusDeviceEntity, BinarySensorEntity):
+    """Binary sensor that is on while a planned smart-charge window is active."""
+
+    _attr_translation_key = "smart_charging"
+    _attr_device_class = BinarySensorDeviceClass.BATTERY_CHARGING
+
+    def __init__(
+        self, coordinator: OctopusDataUpdateCoordinator, device_id: str
+    ) -> None:
+        super().__init__(coordinator, device_id, "smart_charging")
+
+    @property
+    def is_on(self) -> bool:
+        """Return True if the current time falls within any dispatch window."""
+        now = dt_util.utcnow()
+        for node in self._device_data.dispatches:
+            raw_start = node.get("start")
+            raw_end = node.get("end")
+            if raw_start is None or raw_end is None:
+                continue
+            try:
+                start_dt = datetime.fromisoformat(raw_start)
+                if start_dt.tzinfo is None:
+                    start_dt = start_dt.replace(tzinfo=UTC)
+                end_dt = datetime.fromisoformat(raw_end)
+                if end_dt.tzinfo is None:
+                    end_dt = end_dt.replace(tzinfo=UTC)
+                if start_dt <= now < end_dt:
+                    return True
+            except (ValueError, TypeError):
+                continue
+        return False
