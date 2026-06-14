@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/david98/ha_octopus_intelligent_it/compare/v0.2.0...v0.3.0) (2026-06-14)
+
+
+### Features
+
+* **calendar:** expose planned charging schedule, clean up entities ([c40130a](https://github.com/david98/ha_octopus_intelligent_it/commit/c40130a163d188c69251acf3f74298afad2b9309))
+* **calendar:** expose planned charging schedule, clean up entities ([a43b321](https://github.com/david98/ha_octopus_intelligent_it/commit/a43b321986afbc55d3b2de1ceeb68e675bc43bf6))
+
 ## [0.2.0](https://github.com/david98/ha_octopus_intelligent_it/compare/v0.1.0...v0.2.0) (2026-05-25)
 
 
